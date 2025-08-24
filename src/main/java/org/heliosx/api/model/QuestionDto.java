@@ -9,6 +9,7 @@ import java.util.UUID;
 
 @Builder
 @Getter
+@AllArgsConstructor
 public class QuestionDto {
     private String question;
     private UUID questionId;

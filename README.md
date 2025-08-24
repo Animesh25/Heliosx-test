@@ -1,2 +1,3 @@
-where we get questions from? DB? ES?
-different errors/exceptions e.g. dupe customer, prescription
+Java 21
+Sprinboot 3.3.3
+

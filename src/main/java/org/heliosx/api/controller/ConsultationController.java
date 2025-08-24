@@ -1,12 +1,13 @@
 package org.heliosx.api.controller;
 
 import org.heliosx.api.ConsultationResource;
-import org.heliosx.api.model.AnswersRequestBody;
+import org.heliosx.api.model.Answer;
 import org.heliosx.api.model.ConsultationRequestResult;
 import org.heliosx.api.model.QuestionDto;
 import org.heliosx.service.ConsultationService;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -24,7 +25,7 @@ public class ConsultationController implements ConsultationResource {
     }
 
     @Override
-    public ConsultationRequestResult getAnswersResult(AnswersRequestBody answers) {
+    public ConsultationRequestResult getAnswersResult(List<Answer> answers) {
         return consultationService.processAnswers(answers);
     }
 

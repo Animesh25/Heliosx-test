@@ -2,8 +2,11 @@ package org.heliosx.api.model;
 
 import lombok.Getter;
 
+import java.util.UUID;
+
 @Getter
 public class Answer {
-    private QuestionDto question;
+    private String question;
+    private UUID questionId;
     private String answer;
 }

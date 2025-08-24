@@ -1,37 +1,37 @@
 package org.heliosx.service;
 
 import jakarta.annotation.PostConstruct;
-import org.heliosx.api.model.AnswersRequestBody;
+import lombok.NoArgsConstructor;
+import org.heliosx.api.model.Answer;
 import org.heliosx.api.model.ConsultationRequestResult;
 import org.heliosx.api.model.QuestionDto;
-import org.heliosx.repository.ConsultationRepository;
-import org.heliosx.repository.model.QuestionDtoMapper;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
+@NoArgsConstructor
 public class ConsultationService {
 
-    private static final Long THIRTY_MINUTES = 1800_000L;
+    private static final long THIRTY_MINUTES = 1800_000L;
     private static final int MINIMUM_AGE = 18;
     HashSet<QuestionDto> cachedQuestions;
 
-    private ConsultationRepository consultationRepository;
-    private QuestionDtoMapper questionDtoMapper;
+//    private ConsultationRepository consultationRepository;
+//    private QuestionDtoMapper questionDtoMapper;
 
-    public ConsultationService(ConsultationRepository consultationRepository){
-        this.consultationRepository = consultationRepository;
-        this.cachedQuestions = new HashSet<>();
-    }
+//    public ConsultationService(ConsultationRepository consultationRepository){
+//        this.consultationRepository = consultationRepository;
+//        this.cachedQuestions = new HashSet<>();
+//    }
 
     public Set<QuestionDto> getQuestions() {
         return cachedQuestions;
     }
 
     @Scheduled(fixedDelay = THIRTY_MINUTES)
-    private void refreshCache(){
+    private void refreshCache() {
         cachedQuestions = createTemporaryQuestions();
     }
 
@@ -71,11 +71,11 @@ public class ConsultationService {
                 .question("Are you pregnant?")
                 .build();
 
-        return new HashSet<QuestionDto>(Arrays.asList(q1,q2,q3,q4,q5,q6,q7));
+        return new HashSet<QuestionDto>(Arrays.asList(q1, q2, q3, q4, q5, q6, q7));
     }
 
-    public ConsultationRequestResult processAnswers(AnswersRequestBody answers) {
-        if(!isValid(answers)){
+    public ConsultationRequestResult processAnswers(List<Answer> answers) {
+        if (!isValid(answers)) {
             return ConsultationRequestResult.builder()
                     .accepted(false)
                     .rejectionReason("Ensure all fields as filled and valid")
@@ -84,13 +84,13 @@ public class ConsultationService {
 
         // check user health
         // e.g. query allergy db
-        if(hasAllergies(answers)){
+        if (hasAllergies(answers)) {
             return ConsultationRequestResult.builder()
                     .accepted(false)
                     .rejectionReason("We cannot prescribe for people who are allergic to X ingredient(s)")
                     .build();
         }
-        if(isUnderAge(answers)){
+        if (isUnderAge(answers)) {
             return ConsultationRequestResult.builder()
                     .accepted(false)
                     .rejectionReason("We cannot prescribe for people who are less than 18")
@@ -103,33 +103,32 @@ public class ConsultationService {
 
     }
 
-    private boolean isValid(AnswersRequestBody answers) {
-        return !(answers == null || answers.getAnswerList() == null ||
-                answers.getAnswerList().size() == 0);
+    private boolean isValid(List<Answer> answers) {
+        return !(answers == null || answers.size() == 0);
     }
 
-    private boolean hasAllergies(AnswersRequestBody answers){
-        return answers.getAnswerList()
+    private boolean hasAllergies(List<Answer> answers) {
+        return answers
                 .stream()
                 .anyMatch(a -> {
-                    return a.getQuestion().getQuestion().toLowerCase().contains("allergies") &&
+                    return a.getQuestion().toLowerCase().contains("allergies") &&
                             a.getAnswer() != null && !a.getAnswer().isBlank() &&
                             a.getAnswer().equalsIgnoreCase("yes");
                 });
     }
 
-    private boolean isUnderAge(AnswersRequestBody answers){
-        return answers.getAnswerList()
+    private boolean isUnderAge(List<Answer> answers) {
+        return answers
                 .stream()
                 .anyMatch(a -> {
-                    return a.getQuestion().getQuestion().toLowerCase().contains("your age") &&
+                    return a.getQuestion().toLowerCase().contains("your age") &&
                             a.getAnswer() != null && !a.getAnswer().isBlank() &&
                             Integer.parseInt(a.getAnswer()) >= MINIMUM_AGE;
                 });
     }
 
     @PostConstruct
-    private void initQuestionCache(){
+    private void initQuestionCache() {
         cachedQuestions = createTemporaryQuestions();
         // When we have an actual populated DB linked we can uncomment below
 //        cachedQuestions.addAll(consultationRepository.findAll()
